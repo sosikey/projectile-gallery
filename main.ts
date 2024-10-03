@@ -1,11 +1,63 @@
-controller.anyButton.onEvent(ControllerButtonEvent.Pressed, function () {
-    astroid.setPosition(mySprite.x, mySprite.y)
-    astroid.setVelocity(76, -37)
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    astroid = sprites.createProjectileFromSprite(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . c c . . . . . . . 
+        . . . . c a a a a . . . . . . . 
+        . . . . a a f f b a . . . . . . 
+        . . . c a b f f c b . . . . . . 
+        . . . c b b b a f c b . . . . . 
+        . . . c b a c a b b b . . . . . 
+        . . . . b b f f a a c . . . . . 
+        . . . . . a a b b c . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, mySprite, 0, -100)
     astroid.setFlag(SpriteFlag.AutoDestroy, true)
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (true) {
+        current_projectiles += 1
+        sprites.destroyAllSpritesOfKind(SpriteKind.Projectile)
+        current_projectiles += -1
+    }
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    info.changeScoreBy(1)
+    sprites.destroy(enemysprite, effects.spray, 500)
+    sprites.destroy(astroid, effects.spray, 500)
+    if (true) {
+        enemy_velocity += 6
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
+    info.changeLifeBy(-1)
+    sprites.destroy(enemysprite, effects.spray, 0)
 })
 let enemysprite: Sprite = null
 let astroid: Sprite = null
 let mySprite: Sprite = null
+let top_speed = 0
+let enemy_velocity = 0
+let maximum_projectiles = 0
+let difficulty = game.askForNumber("choose difficulty", 1)
+if (difficulty == 1) {
+    maximum_projectiles = 1
+    enemy_velocity = 30
+    top_speed = 50
+} else if (difficulty == 2) {
+    maximum_projectiles = 3
+    enemy_velocity = 50
+    top_speed = 100
+} else if (difficulty == 3) {
+    maximum_projectiles = 5
+    enemy_velocity = 100
+    top_speed = 150
+}
 mySprite = sprites.create(img`
     . f f f . f f f f . f f f . 
     f f f f f c c c c f f f f f 
@@ -24,7 +76,7 @@ mySprite = sprites.create(img`
     . . . . f f f f f f . . . . 
     . . . . f f . . f f . . . . 
     `, SpriteKind.Player)
-mySprite.setPosition(81, 107)
+mySprite.setPosition(117, 98)
 mySprite.setStayInScreen(true)
 controller.moveSprite(mySprite, 100, 100)
 astroid = sprites.create(img`
@@ -45,7 +97,11 @@ astroid = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     `, SpriteKind.Projectile)
-game.onUpdateInterval(1000, function () {
+maximum_projectiles = 5
+let current_projectiles = 0
+enemy_velocity = 50
+top_speed = 150
+game.onUpdateInterval(3000, function () {
     enemysprite = sprites.create(img`
         ........................
         ........................
@@ -72,5 +128,7 @@ game.onUpdateInterval(1000, function () {
         ........................
         ........................
         `, SpriteKind.Enemy)
-    enemysprite.setPosition(79, 7)
+    enemysprite.setPosition(randint(0, 105), -5)
+    enemysprite.setVelocity(0, enemy_velocity)
+    mySprite.setFlag(SpriteFlag.AutoDestroy, true)
 })
